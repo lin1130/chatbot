@@ -17,7 +17,7 @@ review_vector_db = Chroma(
     persist_directory=review_chroma_path,
     embedding_function=OpenAIEmbeddings()
 )
-review_retriever = review_vector_db.as_retriever(k=10)
+reviews_retriever = review_vector_db.as_retriever(k=10)
 
 
 load_dotenv()
@@ -86,3 +86,9 @@ output_parser = StrOutputParser()
 review_chain = review_prompt_template | chat_model | output_parser
 review_chain.invoke({"context": context, "question": question})
 
+review_chain = (
+    {"context": reviews_retriever, "question": RunnablePassthrough()} |
+    review_prompt_template | chat_model | StrOutputParser()
+)
+question = """Has anyone complained about communication with the hospital staff?"""
+review_chain.invoke(question)
