@@ -8,6 +8,16 @@ from langchain.prompts import (
     HumanMessagePromptTemplate, ChatPromptTemplate
 )
 from langchain_core.output_parsers import StrOutputParser
+from langchain_community.vectorstores import Chroma
+from langchain_openai import OpenAIEmbeddings
+from langchain.schema.runnable import RunnablePassthrough
+
+review_chroma_path = "chroma_data/"
+review_vector_db = Chroma(
+    persist_directory=review_chroma_path,
+    embedding_function=OpenAIEmbeddings()
+)
+review_retriever = review_vector_db.as_retriever(k=10)
 
 
 load_dotenv()
@@ -75,3 +85,4 @@ review_prompt_template = ChatPromptTemplate(
 output_parser = StrOutputParser()
 review_chain = review_prompt_template | chat_model | output_parser
 review_chain.invoke({"context": context, "question": question})
+
